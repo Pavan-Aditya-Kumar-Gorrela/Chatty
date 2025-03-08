@@ -28,11 +28,21 @@ app.use(
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
 
+const frontendPath = path.join(__dirname, "frontend", "dist");
+
 if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "../frontend/dist")));
+  console.log("Serving static files from:", frontendPath);
+  app.use(express.static(frontendPath));
 
   app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "../frontend", "dist", "index.html"));
+    const indexPath = path.join(frontendPath, "index.html");
+    console.log("Looking for index.html at:", indexPath);
+    res.sendFile(indexPath, (err) => {
+      if (err) {
+        console.error("Error serving index.html:", err);
+        res.status(500).send("Internal Server Error");
+      }
+    });
   });
 }
 
